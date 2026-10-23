@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayo Mengenal 6 Rukun Iman - Media PAI SLB Fase D</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Lexend (Sangat terbaca untuk ABK/Disleksia) -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #F0F9FF;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animasi Lembut Ramah ABK */
+        .bounce-gentle {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15), 0 8px 10px -6px rgba(14, 165, 233, 0.1);
+        }
+
+        /* Styling khusus tombol sentuh besar */
+        .touch-btn {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .touch-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E0F2FE;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38BDF8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- HEADER / NAVBAR INTERAKTIF -->
+    <header class="bg-sky-500 text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <!-- Navigasi Utama -->
+            <button onclick="goToHome()" class="flex items-center space-x-3 focus:outline-none bg-sky-600 hover:bg-sky-700 p-2 px-4 rounded-2xl touch-btn">
+                <i class="fa-solid font-bold fa-house text-2xl text-yellow-300"></i>
+                <span class="text-xl font-extrabold hidden md:inline">Menu Utama</span>
+            </button>
+
+            <!-- Judul Media -->
+            <div class="text-center">
+                <h1 class="text-lg md:text-2xl font-black text-yellow-300 tracking-wide">AYO MENGENAL 6 RUKUN IMAN</h1>
+                <p class="text-xs md:text-sm font-medium text-sky-100">Media PAI & Budi Pekerti SLB Fase D</p>
+            </div>
+
+            <!-- Tombol Bantuan Narasi Audio Suara Utama & Mode Guru -->
+            <div class="flex items-center space-x-2">
+                <button onclick="speakCurrentPage()" title="Dengarkan Suara" class="bg-yellow-400 hover:bg-yellow-500 text-sky-900 p-3 rounded-full text-2xl font-bold shadow-lg touch-btn flex items-center justify-center w-12 h-12">
+                    <i class="fa-solid fa-volume-high animate-pulse"></i>
+                </button>
+                <button onclick="openTeacherMode()" title="Mode Guru / Orang Tua" class="bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-full text-xl font-bold shadow-lg touch-btn flex items-center justify-center w-12 h-12">
+                    <i class="fa-solid fa-user-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA (DYNAMIC VIEWS) -->
+    <main id="app-content" class="max-w-5xl mx-auto p-4 md:p-6 flex-grow w-full">
+        <!-- Rendered dynamically by JavaScript -->
+    </main>
+
+    <!-- FOOTER NAVIGASI TERIKAT -->
+    <footer class="bg-sky-100 border-t border-sky-200 p-3 text-center text-xs md:text-sm text-sky-700 font-semibold">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div><i class="fa-solid fa-heart text-red-500"></i> Khusus Pembelajaran Siswa SLB Fase D</div>
+            <div id="progress-bar-container" class="w-full md:w-1/3 bg-sky-200 h-4 rounded-full overflow-hidden border border-sky-300 hidden">
+                <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+            <div>Didampingi Guru & Orang Tua</div>
+        </div>
+    </footer>
+
+    <!-- MODAL POPUP UMPAN BALIK / FEEDBACK -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-yellow-400 transform transition-all">
+            <div id="modal-icon" class="text-6xl mb-4">🌟</div>
+            <h2 id="modal-title" class="text-2xl font-black text-slate-800 mb-2">Hebat Sekali!</h2>
+            <p id="modal-desc" class="text-slate-600 text-lg mb-6">Kamu berhasil memilih jawaban yang benar!</p>
+            <button onclick="closeModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl text-xl shadow-lg touch-btn">
+                Lanjut Belajar <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APLIKASI INTERAKTIF -->
+    <script>
+        // Data State Pembelajaran
+        const state = {
+            currentModule: null,
+            currentStep: 0,
+            score: 0,
+            completedModules: [],
+            totalQuestions: 0,
+            correctAnswers: 0,
+            needsHelpCount: 0,
+            studentResponses: []
+        };
+
+        // Data Modul Pembelajaran
+        const modules = [
+            {
+                id: 1,
+                title: "MODUL 1",
+                subtitle: "Pengertian & 6 Rukun Iman",
+                icon: "fa-book-quran",
+                color: "bg-amber-500",
+                lightColor: "bg-amber-50 border-amber-300",
+                textColor: "text-amber-800",
+                introText: "Iman artinya percaya di dalam hati. Orang muslim percaya kepada Allah dan ajaran Islam. Rukun Iman ada 6.",
+                dalilText: "Q.S. Al-Baqarah ayat 285 mengajarkan bahwa orang beriman percaya kepada Allah, Malaikat, Kitab-Kitab, dan para Rasul-Nya.",
+                cards: [
+                    { num: 1, name: "Iman kepada Allah", icon: "fa-cloud-sun", desc: "Percaya Allah itu Ada dan Maha Esa" },
+                    { num: 2, name: "Iman kepada Malaikat", icon: "fa-feather", desc: "Percaya Malaikat utusan Allah" },
+                    { num: 3, name: "Iman kepada Kitab Allah", icon: "fa-book-open", desc: "Percaya Kitab suci Al-Qur'an" },
+                    { num: 4, name: "Iman kepada Rasul Allah", icon: "fa-user-nurse", desc: "Percaya Nabi & Rasul utusan Allah" },
+                    { num: 5, name: "Iman kepada Hari Akhir", icon: "fa-hourglass-end", desc: "Percaya adanya Hari Kiamat" },
+                    { num: 6, name: "Iman kepada Qada & Qadar", icon: "fa-hands-holding-child", desc: "Percaya ketetapan baik Allah" }
+                ],
+                quiz: {
+                    question: "Berapa jumlah Rukun Iman orang Islam?",
+                    speech: "Berapa jumlah Rukun Iman orang Islam? Coba pilih angka yang benar.",
+                    options: [
+                        { text: "3 Rukun Iman", image: "3", icon: "fa-3", isCorrect: false },
+                        { text: "6 Rukun Iman", image: "6", icon: "fa-6", isCorrect: true },
+                        { text: "5 Rukun Iman", image: "5", icon: "fa-5", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 2,
+                title: "MODUL 2",
+                subtitle: "Iman Kepada Allah",
+                icon: "fa-sun",
+                color: "bg-emerald-500",
+                lightColor: "bg-emerald-50 border-emerald-300",
+                textColor: "text-emerald-800",
+                introText: "Allah adalah Tuhan Yang Maha Esa. Allah menciptakan langit, bumi, hewan, dan manusia.",
+                asmaulHusna: [
+                    { name: "Ar-Rahman", mean: "Maha Pengasih" },
+                    { name: "Ar-Rahim", mean: "Maha Penyayang" },
+                    { name: "Al-Khaliq", mean: "Maha Pencipta" },
+                    { name: "As-Sami'", mean: "Maha Mendengar" }
+                ],
+                ciptaan: ["Langit & Matahari", "Pepohonan & Bunga", "Hewan Kucing & Burung", "Manusia / Kita"],
+                quiz: {
+                    question: "Manakah gambar ciptaan Allah yang ada di alam semesta?",
+                    speech: "Manakah gambar ciptaan Allah? Coba pilih gambar yang merupakan ciptaan Allah.",
+                    options: [
+                        { text: "Pohon dan Bunga", icon: "fa-tree", color: "bg-green-100 border-green-500 text-green-700", isCorrect: true },
+                        { text: "Robot Mobil Plastik", icon: "fa-robot", color: "bg-slate-100 border-slate-400 text-slate-700", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 3,
+                title: "MODUL 3",
+                subtitle: "Iman Kepada Malaikat",
+                icon: "fa-hand-holding-heart",
+                color: "bg-sky-500",
+                lightColor: "bg-sky-50 border-sky-300",
+                textColor: "text-sky-800",
+                introText: "Malaikat adalah makhluk ciptaan Allah yang selalu patuh dan taat. Ada 10 Malaikat yang wajib kita ketahui.",
+                malaikatList: [
+                    { name: "Jibril", duty: "Menyampaikan Wahyu" },
+                    { name: "Mikail", duty: "Membagi Rezeki & Hujan" },
+                    { name: "Israfil", duty: "Meniup Sangkakala" },
+                    { name: "Izrail", duty: "Mencabut Nyawa" },
+                    { name: "Munkar & Nakir", duty: "Bertanya di Alam Kubur" },
+                    { name: "Raqib", duty: "Mencatat Amal Baik" },
+                    { name: "Atid", duty: "Mencatat Amal Buruk" },
+                    { name: "Malik", duty: "Menjaga Neraka" },
+                    { name: "Ridwan", duty: "Menjaga Surga" }
+                ],
+                quiz: {
+                    question: "Malaikat Raqib mencatat amal baik kita. Perilaku manakah yang merupakan kebaikan?",
+                    speech: "Malaikat Raqib mencatat amal baik. Manakah contoh perbuatan baik?",
+                    options: [
+                        { text: "Membantu Teman Jatuh", icon: "fa-hand-holding-hand", color: "bg-emerald-100 border-emerald-500 text-emerald-800", isCorrect: true },
+                        { text: "Mencoret Tembok Sekolah", icon: "fa-ban", color: "bg-rose-100 border-rose-400 text-rose-800", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 4,
+                title: "MODUL 4",
+                subtitle: "Iman Kepada Kitab Allah",
+                icon: "fa-book-bible",
+                color: "bg-indigo-500",
+                lightColor: "bg-indigo-50 border-indigo-300",
+                textColor: "text-indigo-800",
+                introText: "Allah menurunkan Kitab Suci sebagai petunjuk hidup manusia agar selamat di dunia dan akhirat.",
+                kitabList: [
+                    { kitab: "Taurat", nabi: "Nabi Musa a.s." },
+                    { kitab: "Zabur", nabi: "Nabi Daud a.s." },
+                    { kitab: "Injil", nabi: "Nabi Isa a.s." },
+                    { kitab: "Al-Qur'an", nabi: "Nabi Muhammad saw." }
+                ],
+                quiz: {
+                    question: "Manakah Kitab Suci petunjuk umat Islam yang diturunkan kepada Nabi Muhammad saw.?",
+                    speech: "Manakah Kitab Suci umat Islam? Coba pilih gambar Al-Qur'an.",
+                    options: [
+                        { text: "Al-Qur'an Suci", icon: "fa-book-quran", color: "bg-teal-100 border-teal-500 text-teal-800", isCorrect: true },
+                        { text: "Buku Komik Gambar", icon: "fa-book", color: "bg-amber-100 border-amber-400 text-amber-800", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 5,
+                title: "MODUL 5",
+                subtitle: "Iman Kepada Rasul Allah",
+                icon: "fa-users-line",
+                color: "bg-teal-500",
+                lightColor: "bg-teal-50 border-teal-300",
+                textColor: "text-teal-800",
+                introText: "Rasul adalah manusia pilihan Allah yang menjadi teladan jujur dan baik bagi seluruh manusia.",
+                sifatRasul: [
+                    { title: "Siddiq", meaning: "Jujur / Tidak Berbohong" },
+                    { title: "Amanah", meaning: "Dapat Dipercaya" },
+                    { title: "Tabligh", meaning: "Menyampaikan Kebaikan" },
+                    { title: "Fatanah", meaning: "Cerdas & Bijaksana" }
+                ],
+                quiz: {
+                    question: "Nabi Muhammad saw. mengajarkan kita untuk berkata jujur. Contoh anak jujur adalah...",
+                    speech: "Contoh perilaku jujur meneladani Rasulullah adalah...",
+                    options: [
+                        { text: "Mengaku Mengambil Pensil & Meminta Maaf", icon: "fa-circle-check", color: "bg-emerald-100 border-emerald-500 text-emerald-800", isCorrect: true },
+                        { text: "Menyembunyikan Mainan Teman", icon: "fa-circle-xmark", color: "bg-rose-100 border-rose-400 text-rose-800", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 6,
+                title: "MODUL 6",
+                subtitle: "Iman Kepada Hari Akhir",
+                icon: "fa-star-and-crescent",
+                color: "bg-purple-500",
+                lightColor: "bg-purple-50 border-purple-300",
+                textColor: "text-purple-800",
+                introText: "Hari Akhir adalah hari kiamat. Semua perbuatan baik kita akan mendapat balasan pahala indah di surga Allah.",
+                hikmah: "Rajin beribadah, suka menolong, berkata sopan, dan berbuat baik kepada semua orang.",
+                quiz: {
+                    question: "Agar mendapat pahala dan balasan baik dari Allah, kita harus rajin...",
+                    speech: "Agar mendapat balasan baik dari Allah, perbuatan apa yang harus kita lakukan?",
+                    options: [
+                        { text: "Berdoa & Rajin Sholat", icon: "fa-hands-praying", color: "bg-purple-100 border-purple-500 text-purple-800", isCorrect: true },
+                        { text: "Marah-marah kepada Teman", icon: "fa-face-angry", color: "bg-orange-100 border-orange-400 text-orange-800", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 7,
+                title: "MODUL 7",
+                subtitle: "Iman Qada & Qadar",
+                icon: "fa-person-running",
+                color: "bg-rose-500",
+                lightColor: "bg-rose-50 border-rose-300",
+                textColor: "text-rose-800",
+                introText: "Qada dan Qadar adalah takdir ketetapan Allah. Manusia wajib berusaha (ikhtiar) dan berdoa (tawakal).",
+                langkah: [
+                    { step: "1. Ikhtiar", desc: "Berusaha & Belajar Giat" },
+                    { step: "2. Doa", desc: "Memohon Bantuan Allah" },
+                    { step: "3. Tawakal", desc: "Ikhlas Menerima Hasil" }
+                ],
+                quiz: {
+                    question: "Jika kamu mengalami kesulitan saat mewarnai atau menulis, apa yang harus kamu lakukan?",
+                    speech: "Jika kamu kesulitan, apa yang harus kamu lakukan?",
+                    options: [
+                        { text: "Terus Berlatih & Meminta Bantuan Guru", icon: "fa-chalkboard-user", color: "bg-emerald-100 border-emerald-500 text-emerald-800", isCorrect: true },
+                        { text: "Menangis dan Langsung Menyerah", icon: "fa-face-sad-tear", color: "bg-rose-100 border-rose-400 text-rose-800", isCorrect: false }
+                    ]
+                }
+            },
+            {
+                id: 8,
+                title: "MODUL 8",
+                subtitle: "Penerapan Iman Sehari-hari",
+                icon: "fa-heart-circle-check",
+                color: "bg-fuchsia-500",
+                lightColor: "bg-fuchsia-50 border-fuchsia-300",
+                textColor: "text-fuchsia-800",
+                introText: "Anak muslim yang beriman selalu menerapkan 6 Rukun Iman dalam kegiatan sehari-hari di rumah dan sekolah.",
+                penerapan: [
+                    "Merawat Tanaman & Bunga",
+                    "Suka Berbagi Makanan",
+                    "Membuang Sampah pada Tempatnya",
+                    "Antre dengan Tertib"
+                ],
+                quiz: {
+                    question: "Pilihlah gambar tindakan baik yang menunjukkan kepedulian terhadap lingkungan sekitar!",
+                    speech: "Pilihlah gambar tindakan baik membuang sampah pada tempatnya.",
+                    options: [
+                        { text: "Membuang Sampah ke Tempat Sampah", icon: "fa-trash-can", color: "bg-emerald-100 border-emerald-500 text-emerald-800", isCorrect: true },
+                        { text: "Membuang Plastik di Jalanan", icon: "fa-dumpster", color: "bg-red-100 border-red-400 text-red-800", isCorrect: false }
+                    ]
+                }
+            }
+        ];
+
+        // --- WEB SPEECH API (AUDIO NARASI) ---
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop audio sebelumnya
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85; // Bicara perlahan untuk ABK
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.log("Web Speech API tidak didukung browser ini.");
+            }
+        }
+
+        function speakCurrentPage() {
+            const content = document.getElementById("app-content");
+            if (content) {
+                const readableText = content.innerText.replace(/[\r\n]+/g, ". ");
+                speakText(readableText.substring(0, 300)); // Baca ringkas
+            }
+        }
+
+        // --- RENDER MENU UTAMA ---
+        function goToHome() {
+            window.speechSynthesis.cancel();
+            state.currentModule = null;
+            state.currentStep = 0;
+            
+            document.getElementById("progress-bar-container").classList.add("hidden");
+
+            const app = document.getElementById("app-content");
+            app.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Banner Selamat Datang -->
+                    <div class="bg-gradient-to-r from-sky-400 to-blue-600 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                        <div class="relative z-10 max-w-2xl">
+                            <span class="bg-yellow-400 text-sky-950 px-4 py-1.5 rounded-full font-black text-xs md:text-sm uppercase tracking-wider mb-3 inline-block">PAI SLB FASE D</span>
+                            <h2 class="text-2xl md:text-4xl font-black mb-2">Selamat Belajar, Anak Hebat! 👋</h2>
+                            <p class="text-sky-100 text-sm md:text-lg mb-4">Mari belajar 6 Rukun Iman dengan Gambar, Suara, dan Permainan Seru.</p>
+                            <button onclick="speakText('Selamat Datang di media pembelajaran Ayo Mengenal 6 Rukun Iman. Sentuh salah satu kartu warna-warni di bawah untuk mulai belajar!')" class="bg-white text-sky-600 hover:bg-yellow-300 font-bold px-5 py-3 rounded-2xl shadow-md touch-btn flex items-center space-x-2 text-sm md:text-base">
+                                <i class="fa-solid fa-volume-high text-xl"></i>
+                                <span>Dengarkan Petunjuk</span>
+                            </button>
+                        </div>
+                        <i class="fa-solid fa-shapes text-9xl absolute -right-10 -bottom-10 text-white/10"></i>
+                    </div>
+
+                    <!-- Grid Modul Pembelajaran (8 Modul) -->
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-shapes text-sky-500"></i> Pilih Modul Belajar:
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            ${modules.map(m => `
+                                <div onclick="openModule(${m.id})" class="bg-white rounded-3xl p-5 border-2 border-slate-100 card-shadow hover:border-sky-400 transition-all cursor-pointer touch-btn flex flex-col justify-between relative overflow-hidden group">
+                                    <div class="${m.color} text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black mb-4 shadow-md group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid ${m.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold ${m.textColor} uppercase tracking-wider">${m.title}</span>
+                                        <h4 class="text-lg font-black text-slate-800 leading-snug mb-1">${m.subtitle}</h4>
+                                    </div>
+                                    <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                                        <span class="text-xs font-semibold text-slate-400">
+                                            ${state.completedModules.includes(m.id) ? '<span class="text-emerald-500 font-bold"><i class="fa-solid fa-circle-check"></i> Selesai</span>' : 'Klik untuk Buka'}
+                                        </span>
+                                        <i class="fa-solid fa-circle-play text-sky-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- BUKA MODUL SPESIFIK ---
+        function openModule(moduleId) {
+            const m = modules.find(x => x.id === moduleId);
+            if (!m) return;
+
+            state.currentModule = m;
+            state.currentStep = 1; // Step 1: Materi, Step 2: Kuis Interaktif
+            renderModuleStep();
+        }
+
+        function renderModuleStep() {
+            const m = state.currentModule;
+            const app = document.getElementById("app-content");
+            const progressBar = document.getElementById("progress-bar");
+            document.getElementById("progress-bar-container").classList.remove("hidden");
+
+            // Update Progress Bar
+            progressBar.style.width = state.currentStep === 1 ? "50%" : "100%";
+
+            if (state.currentStep === 1) {
+                // TAMPILAN MATERI MODUL
+                speakText(`${m.title}. ${m.subtitle}. ${m.introText}`);
+
+                app.innerHTML = `
+                    <div class="space-y-6">
+                        <!-- Navigation Bar Sub-Modul -->
+                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                            <button onclick="goToHome()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl touch-btn flex items-center space-x-2">
+                                <i class="fa-solid fa-arrow-left"></i> <span>Kembali</span>
+                            </button>
+                            <span class="font-extrabold ${m.textColor} text-sm md:text-base">${m.title}: ${m.subtitle}</span>
+                            <button onclick="speakText('${m.introText}')" class="bg-yellow-400 hover:bg-yellow-500 text-sky-950 font-bold px-3 py-2 rounded-xl touch-btn flex items-center space-x-1">
+                                <i class="fa-solid fa-volume-high"></i> <span class="hidden md:inline">Ulangi Suara</span>
+                            </button>
+                        </div>
+
+                        <!-- Kartu Penjelasan Utama -->
+                        <div class="${m.lightColor} border-2 rounded-3xl p-6 md:p-8 text-center space-y-4 shadow-sm">
+                            <div class="${m.color} text-white w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-lg bounce-gentle">
+                                <i class="fa-solid ${m.icon}"></i>
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-black ${m.textColor}">${m.subtitle}</h2>
+                            <p class="text-slate-700 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                                "${m.introText}"
+                            </p>
+                        </div>
+
+                        <!-- KONTEN SPESIFIK TIAP MODUL (KARTU VISUAL) -->
+                        ${renderModuleSpecificContent(m)}
+
+                        <!-- Tombol Lanjut ke Kuis -->
+                        <div class="pt-4 flex justify-end">
+                            <button onclick="nextStep()" class="w-full md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-4 rounded-2xl text-xl shadow-lg touch-btn flex items-center justify-center space-x-3">
+                                <span>Lanjut Permainan Kuis</span>
+                                <i class="fa-solid fa-circle-arrow-right text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.currentStep === 2) {
+                // TAMPILAN KUIS BERGAMBAR INTERAKTIF
+                speakText(m.quiz.speech);
+
+                app.innerHTML = `
+                    <div class="space-y-6">
+                        <!-- Navigation Bar Sub-Modul -->
+                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                            <button onclick="state.currentStep = 1; renderModuleStep();" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl touch-btn">
+                                <i class="fa-solid fa-arrow-left"></i> Baca Materi Lagi
+                            </button>
+                            <span class="font-extrabold text-emerald-600 text-sm md:text-base"><i class="fa-solid fa-gamepad"></i> Permainan Kuis</span>
+                        </div>
+
+                        <!-- Pertanyaan Kuis -->
+                        <div class="bg-white border-2 border-sky-300 rounded-3xl p-6 md:p-8 text-center space-y-4 shadow-md">
+                            <span class="bg-sky-100 text-sky-800 font-bold px-4 py-1.5 rounded-full text-xs md:text-sm inline-block">PERTANYAAN GAMBAR</span>
+                            <h3 class="text-xl md:text-2xl font-black text-slate-800 leading-snug">
+                                ${m.quiz.question}
+                            </h3>
+                            <button onclick="speakText('${m.quiz.speech}')" class="bg-yellow-400 hover:bg-yellow-500 text-sky-950 font-bold px-4 py-2 rounded-xl touch-btn inline-flex items-center space-x-2 text-sm">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span>Dengarkan Soal Lagi</span>
+                            </button>
+                        </div>
+
+                        <!-- Pilihan Jawaban Bergambar (Besar & Mudah Ditekan) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${m.quiz.options.map((opt, idx) => `
+                                <button onclick="checkAnswer(${opt.isCorrect}, '${opt.text}')" class="bg-white border-4 border-slate-200 hover:border-sky-400 rounded-3xl p-6 text-center shadow-md touch-btn flex flex-col items-center justify-center space-y-3 group transition-all">
+                                    <div class="w-20 h-20 rounded-2xl ${opt.color || 'bg-sky-100 text-sky-600'} flex items-center justify-center text-4xl shadow-inner group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid ${opt.icon}"></i>
+                                    </div>
+                                    <span class="text-xl font-black text-slate-800">${opt.text}</span>
+                                    <span class="text-xs text-slate-400 font-bold">Tekan untuk Memilih</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Render Konten Spesifik berdasarkan Modul ID
+        function renderModuleSpecificContent(m) {
+            if (m.cards) { // Modul 1
+                return `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${m.cards.map(c => `
+                            <div onclick="speakText('Rukun Iman ke ${c.num}: ${c.name}. ${c.desc}')" class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm hover:border-amber-400 transition-all cursor-pointer touch-btn flex items-center space-x-4">
+                                <div class="bg-amber-100 text-amber-700 font-black w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                    ${c.num}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base">${c.name}</h4>
+                                    <p class="text-xs text-slate-500">${c.desc}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (m.asmaulHusna) { // Modul 2
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-extrabold text-slate-700 text-lg">Mengenal Nama Indah Allah (Asmaul Husna):</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${m.asmaulHusna.map(a => `
+                                <div onclick="speakText('${a.name} artinya ${a.mean}')" class="bg-white p-4 rounded-2xl border border-emerald-200 text-center shadow-sm cursor-pointer touch-btn">
+                                    <div class="text-emerald-600 font-black text-lg">${a.name}</div>
+                                    <div class="text-xs text-slate-500 font-medium">${a.mean}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (m.malaikatList) { // Modul 3
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        ${m.malaikatList.map(malk => `
+                            <div onclick="speakText('Malaikat ${malk.name} tugasnya ${malk.duty}')" class="bg-white p-4 rounded-2xl border border-sky-200 shadow-sm cursor-pointer touch-btn flex items-center space-x-3">
+                                <div class="bg-sky-100 text-sky-600 p-3 rounded-xl"><i class="fa-solid fa-feather"></i></div>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-sm">Malaikat ${malk.name}</div>
+                                    <div class="text-xs text-sky-600 font-medium">${malk.duty}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (m.kitabList) { // Modul 4
+                return `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        ${m.kitabList.map(k => `
+                            <div onclick="speakText('Kitab ${k.kitab} diturunkan kepada ${k.nabi}')" class="bg-white p-4 rounded-2xl border border-indigo-200 text-center shadow-sm cursor-pointer touch-btn">
+                                <i class="fa-solid fa-book-bookmark text-indigo-500 text-3xl mb-2"></i>
+                                <div class="font-black text-slate-800 text-base">${k.kitab}</div>
+                                <div class="text-xs text-indigo-600 font-medium">${k.nabi}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (m.sifatRasul) { // Modul 5
+                return `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        ${m.sifatRasul.map(s => `
+                            <div onclick="speakText('${s.title} artinya ${s.meaning}')" class="bg-white p-4 rounded-2xl border border-teal-200 text-center shadow-sm cursor-pointer touch-btn">
+                                <div class="font-black text-teal-700 text-lg">${s.title}</div>
+                                <div class="text-xs text-slate-500 font-medium">${s.meaning}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        // --- CEK JAWABAN KUIS ---
+        function checkAnswer(isCorrect, answerText) {
+            state.totalQuestions++;
+            state.studentResponses.push({
+                module: state.currentModule.title,
+                answer: answerText,
+                isCorrect: isCorrect
+            });
+
+            const modal = document.getElementById("feedback-modal");
+            const modalIcon = document.getElementById("modal-icon");
+            const modalTitle = document.getElementById("modal-title");
+            const modalDesc = document.getElementById("modal-desc");
+
+            if (isCorrect) {
+                state.correctAnswers++;
+                state.score += 12.5; // Total 8 Modul = 100
+                if (!state.completedModules.includes(state.currentModule.id)) {
+                    state.completedModules.push(state.currentModule.id);
+                }
+
+                modalIcon.innerText = "🌟";
+                modalTitle.innerText = "Hebat Sekali!";
+                modalTitle.className = "text-2xl font-black text-emerald-600 mb-2";
+                modalDesc.innerText = "Kamu memilih jawaban yang benar!";
+                speakText("Hebat sekali! Jawaban kamu benar!");
+            } else {
+                state.needsHelpCount++;
+                modalIcon.innerText = "🤗";
+                modalTitle.innerText = "Ayo Coba Lagi!";
+                modalTitle.className = "text-2xl font-black text-amber-600 mb-2";
+                modalDesc.innerText = "Tidak apa-apa, ayo dengarkan dan coba lagi bersama guru.";
+                speakText("Tidak apa-apa, mari coba sekali lagi bersama-sama.");
+            }
+
+            modal.classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("feedback-modal").classList.add("hidden");
+            goToHome();
+        }
+
+        function nextStep() {
+            state.currentStep = 2;
+            renderModuleStep();
+        }
+
+        // --- MODE GURU / ORANG TUA ---
+        function openTeacherMode() {
+            window.speechSynthesis.cancel();
+            const app = document.getElementById("app-content");
+            document.getElementById("progress-bar-container").classList.add("hidden");
+
+            app.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Header Mode Guru -->
+                    <div class="flex justify-between items-center bg-teal-700 text-white p-5 rounded-3xl shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-user-gear text-3xl text-yellow-300"></i>
+                            <div>
+                                <h2 class="text-xl font-extrabold">MODE GURU & ORANG TUA</h2>
+                                <p class="text-xs text-teal-100">Panduan Asesmen & Perkembangan Belajar Siswa</p>
+                            </div>
+                        </div>
+                        <button onclick="goToHome()" class="bg-teal-800 hover:bg-teal-900 text-white font-bold px-4 py-2 rounded-xl touch-btn text-sm">
+                            <i class="fa-solid fa-xmark"></i> Tutup
+                        </button>
+                    </div>
+
+                    <!-- Rekapitulasi Perkembangan Siswa -->
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-lg font-black text-slate-800 border-b pb-2">
+                            <i class="fa-solid fa-chart-line text-teal-600"></i> Rekapitulasi Perkembangan Siswa
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200">
+                                <div class="text-2xl font-black text-sky-600">${state.completedModules.length} / 8</div>
+                                <div class="text-xs text-slate-500 font-bold">Modul Selesai</div>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                                <div class="text-2xl font-black text-emerald-600">${state.correctAnswers}</div>
+                                <div class="text-xs text-slate-500 font-bold">Jawaban Benar</div>
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                                <div class="text-2xl font-black text-amber-600">${state.needsHelpCount}</div>
+                                <div class="text-xs text-slate-500 font-bold">Perlu Bimbingan</div>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200">
+                                <div class="text-2xl font-black text-purple-600">${Math.round(state.score)}</div>
+                                <div class="text-xs text-slate-500 font-bold">Estimasi Skor</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panduan Pendampingan Guru -->
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="text-lg font-black text-slate-800 border-b pb-2">
+                            <i class="fa-solid fa-chalkboard-user text-teal-600"></i> Panduan Pendampingan Siswa SLB
+                        </h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm text-slate-600 leading-relaxed">
+                            <li>Gunakan tombol audio ikon speaker untuk membacakan narasi jika siswa kesulitan membaca secara tertulis.</li>
+                            <li>Siswa yang kesulitan komunikasi lisan dapat menjawab kuis dengan menunjuk layar sentuh secara langsung.</li>
+                            <li>Berikan penguatan positif dan waktu tunggu secukupnya saat siswa memproses informasi visual.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Dokumen Pendukung & Integrasi Google Docs -->
+                    <div class="bg-amber-50 border border-amber-300 p-6 rounded-3xl space-y-3">
+                        <h3 class="text-lg font-black text-amber-900 flex items-center gap-2">
+                            <i class="fa-solid fa-file-word text-blue-600"></i> Dokumen Pendukung & RPP
+                        </h3>
+                        <p class="text-xs text-amber-800">
+                            Dokumen identitas mata pelajaran, RPP, rubrik penilaian, dan lembar observasi siswa SLB Fase D tersedia untuk diunduh atau diunggah ke Google Docs.
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="downloadWordGuide()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-md touch-btn flex items-center space-x-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Unduh Panduan (.docx)</span>
+                            </button>
+                            <a href="https://docs.google.com" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-md touch-btn flex items-center space-x-2">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                <span>Buka Google Docs</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- SIMULASI DOWNLOAD DOKUMEN PANDUAN GURU ---
+        function downloadWordGuide() {
+            const docContent = `
+===================================================================
+DOKUMEN PENDUKUNG MEDIA PEMBELAJARAN INTERAKTIF PAI SLB FASE D
+Judul: AYO MENGENAL 6 RUKUN IMAN
+===================================================================
+
+A. IDENTITAS MATA PELAJARAN
+   - Mata Pelajaran  : Pendidikan Agama Islam dan Budi Pekerti
+   - Sasaran         : Siswa SLB / Anak Berkebutuhan Khusus (Fase D)
+   - Metode          : Audio-Visual-Kinestetik Interaktif
+
+B. KARAKTERISTIK SISWA & TUJUAN
+   - Membantu siswa yang belum membaca lancar mengenal Rukun Iman.
+   - Pilihan berbasis gambar dan narasi suara otomatis.
+
+C. RUBRIK PENILAIAN OBSERVASI
+   1. Mengenal Gambar Ciptaan Allah & Simbol Rukun Iman.
+   2. Merespons Instruksi Audio.
+   3. Menerapkan Perilaku Terpuji Sehari-hari.
+            `;
+
+            const blob = new Blob([docContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Panduan_Guru_PAI_SLB_Fase_D.txt';
+            link.click();
+        }
+
+        // --- INISIALISASI APLIKASI SAAT REFRESH ---
+        window.onload = function() {
+            goToHome();
+        };
+    </script>
+</body>
+</html>
